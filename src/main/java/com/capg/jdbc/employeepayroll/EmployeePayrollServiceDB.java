@@ -37,7 +37,7 @@ public class EmployeePayrollServiceDB {
 		}
 		return employeePayrollList;
 	}
-
+ 
 	public List<EmployeePayrollData> showEmployeePayrollByName(String name) throws DBServiceException {
 		List<EmployeePayrollData> employeePayrollListByName = new ArrayList<>();
 		String query = String.format("select * from employee_payroll where name = '%s';", name);
