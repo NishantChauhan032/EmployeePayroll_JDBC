@@ -40,11 +40,11 @@ public class EmployeePayrollServiceDB {
 
 	public List<EmployeePayrollData> showEmployeePayrollByName(String name) throws DBServiceException {
 		List<EmployeePayrollData> employeePayrollListByName = new ArrayList<>();
-		String query = String.format("select * from Employee_Payroll where name = '%s';", name);
+		String query = String.format("select * from employee_payroll where name = '%s';", name);
 		new PayrollService();
 		try (Connection connection = PayrollService.getConnection()) {
-			Statement statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery(query);
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			ResultSet resultSet = preparedStatement.executeQuery(query);
 			if (resultSet.next()) {
 				int id = resultSet.getInt(1);
 				String gender = resultSet.getString(3);
@@ -77,8 +77,8 @@ public class EmployeePayrollServiceDB {
 
 		String query = "update employee_payroll set salary = ? where name = ?";
 		new PayrollService();
-		try(Connection con = PayrollService.getConnection()) {
-			PreparedStatement preparedStatement = con.prepareStatement(query);
+		try(Connection connection = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setDouble(1,salary);
 			preparedStatement.setString(2,name);
 			int result = preparedStatement.executeUpdate();
@@ -92,7 +92,11 @@ public class EmployeePayrollServiceDB {
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) {
-		return employeePayrollList.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+		return employeePayrollList.stream()
+				                  .filter(e -> e.getName()
+				                  .equals(name))
+				                  .findFirst()
+				                  .orElse(null);
 	}
 
 	public boolean checkForDBSync(String name) throws DBServiceException {
