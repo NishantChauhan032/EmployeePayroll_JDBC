@@ -1,6 +1,7 @@
 package com.capg.jdbc.employeepayroll;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -71,6 +72,24 @@ public class EmployeePayrollServiceDB {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
 	}
+	
+	public void updateEmployeeSalaryUsingPreparedStatement(String name, double salary) throws DBServiceException {
+
+		String query = "update employee_payroll set salary = ? where name = ?";
+		new PayrollService();
+		try(Connection con = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = con.prepareStatement(query);
+			preparedStatement.setDouble(1,salary);
+			preparedStatement.setString(2,name);
+			int result = preparedStatement.executeUpdate();
+			employeePayrollData = getEmployeePayrollData(name);
+			if(result > 0 && employeePayrollData != null)
+				employeePayrollData.setSalary(salary);
+		}catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+		
+	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) {
 		return employeePayrollList.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
@@ -86,4 +105,6 @@ public class EmployeePayrollServiceDB {
 		}
 		return result;
 	}
+
+	
 }
