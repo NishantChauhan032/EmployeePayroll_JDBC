@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EmployeePayrollServiceDB {
 
@@ -16,7 +18,7 @@ public class EmployeePayrollServiceDB {
 	public List<EmployeePayrollData> viewEmployeePayroll() throws DBServiceException {
 
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		
+
 		String query = "select * from employee_payroll";
 
 		new PayrollService();
@@ -44,7 +46,7 @@ public class EmployeePayrollServiceDB {
 		new PayrollService();
 		try (Connection connection = PayrollService.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, name );
+			preparedStatement.setString(1, name);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			if (resultSet.next()) {
 				int id = resultSet.getInt(1);
@@ -93,11 +95,7 @@ public class EmployeePayrollServiceDB {
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) throws DBServiceException {
-		return viewEmployeePayroll().stream()
-				                    .filter(e -> e.getName()
-				                    .equals(name))
-				                    .findFirst()
-				                    .orElse(null);
+		return viewEmployeePayroll().stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	public boolean checkForDBSync(String name) throws DBServiceException {
@@ -114,10 +112,10 @@ public class EmployeePayrollServiceDB {
 	public List<EmployeePayrollData> showEmployeeJoinedWithinADateRange(LocalDate startDate, LocalDate endDate)
 			throws DBServiceException {
 		List<EmployeePayrollData> employeePayrollListJoinedWithinADateRange = new ArrayList<>();
-		String query = "select * from Employee_Payroll where start_date between ? and  ?";
+		String query = "select * from employee_payroll where start_date between ? and  ?";
 		new PayrollService();
-		try (Connection con = PayrollService.getConnection()) {
-			PreparedStatement preparedStatement = con.prepareStatement(query);
+		try (Connection connection = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setDate(1, Date.valueOf(startDate));
 			preparedStatement.setDate(2, Date.valueOf(endDate));
 			ResultSet resultSet = preparedStatement.executeQuery();
@@ -136,4 +134,20 @@ public class EmployeePayrollServiceDB {
 		return employeePayrollListJoinedWithinADateRange;
 	}
 
+	public Map<String,Double> showEmployeeDataGroupedByGender(String column , String operation) throws DBServiceException
+	{
+		Map<String,Double> employeeDataGroupByGender = new HashMap<>();
+		String query = String.format("select gender , %s(%s) from Employee_Payroll group by gender;" , operation , column);
+		try(Connection con = new PayrollService().getConnection()) {
+			PreparedStatement preparedStatement = con.prepareStatement(query);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next())
+			{
+				employeeDataGroupByGender.put(resultSet.getString(1), resultSet.getDouble(2));
+			}
+		}catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+		return employeeDataGroupByGender;
+	}	
 }
