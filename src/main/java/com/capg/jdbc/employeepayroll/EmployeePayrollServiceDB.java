@@ -1,26 +1,34 @@
 package com.capg.jdbc.employeepayroll;
 
-import java.util.List;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeePayrollServiceDB {
+
+	List<EmployeePayrollData> employeePayrollList;
+	EmployeePayrollData employeePayrollData = null;
+
 	public List<EmployeePayrollData> viewEmployeePayroll() throws DBServiceException {
-		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		PayrollService obj = new PayrollService();
+
+		employeePayrollList = new ArrayList<>();
 		EmployeePayrollData employeePayrollData = null;
 		String query = "select * from employee_payroll";
 
-		try (Connection connection = obj.getConnection()) {
+		new PayrollService();
+		try (Connection connection = PayrollService.getConnection()) {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
 				int id = resultSet.getInt(1);
 				String name = resultSet.getString(2);
-				double salary = resultSet.getDouble(3);
-				LocalDate start = resultSet.getDate(4).toLocalDate();
-				employeePayrollData = new EmployeePayrollData(id, name, salary, start);
+				String gender = resultSet.getString(3);
+				double salary = resultSet.getDouble(4);
+				LocalDate start = resultSet.getDate(5).toLocalDate();
+				employeePayrollData = new EmployeePayrollData(id, name, gender, salary, start);
 				employeePayrollList.add(employeePayrollData);
 			}
 		} catch (Exception e) {
@@ -29,4 +37,53 @@ public class EmployeePayrollServiceDB {
 		return employeePayrollList;
 	}
 
+	public List<EmployeePayrollData> showEmployeePayrollByName(String name) throws DBServiceException {
+		List<EmployeePayrollData> employeePayrollListByName = new ArrayList<>();
+		String query = String.format("select * from Employee_Payroll where name = '%s';", name);
+		new PayrollService();
+		try (Connection connection = PayrollService.getConnection()) {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				int id = resultSet.getInt(1);
+				String gender = resultSet.getString(3);
+				double salary = resultSet.getDouble(4);
+				LocalDate start = resultSet.getDate(5).toLocalDate();
+				employeePayrollData = new EmployeePayrollData(id, name, gender, salary, start);
+				employeePayrollListByName.add(employeePayrollData);
+			}
+		} catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+		return employeePayrollListByName;
+	}
+
+	public void updateEmployeeSalary(String name, double salary) throws DBServiceException {
+		String query = String.format("update employee_payroll set salary = %.2f where name = '%s';", salary, name);
+		new PayrollService();
+		try (Connection connection = PayrollService.getConnection()) {
+			Statement statement = connection.createStatement();
+			int result = statement.executeUpdate(query);
+			employeePayrollData = getEmployeePayrollData(name);
+			if (result > 0 && employeePayrollData != null)
+				employeePayrollData.setSalary(salary);
+		} catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+	}
+
+	private EmployeePayrollData getEmployeePayrollData(String name) {
+		return employeePayrollList.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+	}
+
+	public boolean checkForDBSync(String name) throws DBServiceException {
+		boolean result = false;
+		try {
+			result = (showEmployeePayrollByName(name).get(0)).equals(getEmployeePayrollData(name));
+		} catch (IndexOutOfBoundsException e) {
+		} catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+		return result;
+	}
 }

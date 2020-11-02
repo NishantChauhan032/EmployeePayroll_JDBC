@@ -5,13 +5,15 @@ import java.time.LocalDate;
 public class EmployeePayrollData {
 	private int id;
 	private String name;
+	private String gender;
 	private double salary;
 	private LocalDate start_date;
-
-	public EmployeePayrollData(int id, String name, double salary, LocalDate start_date) {
+	
+	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start_date) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.gender = gender;
 		this.salary = salary;
 		this.start_date = start_date;
 	}
@@ -47,11 +49,53 @@ public class EmployeePayrollData {
 	public void setStart_date(LocalDate start_date) {
 		this.start_date = start_date;
 	}
+	
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
 	@Override
 	public String toString() {
 		return "EmployeePayrollData [ID=" + id + ", name=" + name + ", salary=" + salary + ", start_date=" + start_date
 				+ "]";
 	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (this == object)
+			return true;
+		if (object == null)
+			return false;
+		if (getClass() != object.getClass())
+			return false;
+		
+		EmployeePayrollData other = (EmployeePayrollData) object;
+		if (id != other.id)
+			return false;
+		if (gender == null) {
+			if (other.gender != null)
+				return false;
+		} else if (!gender.equals(other.gender))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (Double.doubleToLongBits(salary) != Double.doubleToLongBits(other.salary))
+			return false;
+		if (start_date == null) {
+			if (other.start_date != null)
+				return false;
+		} else if (!start_date.equals(other.start_date))
+			return false;
+		return true;
+	}
+
 
 }
