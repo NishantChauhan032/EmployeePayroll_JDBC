@@ -1,6 +1,7 @@
 package com.capg.jdbc.employeepayroll;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -10,13 +11,12 @@ import java.util.List;
 
 public class EmployeePayrollServiceDB {
 
-	List<EmployeePayrollData> employeePayrollList;
 	EmployeePayrollData employeePayrollData = null;
 
 	public List<EmployeePayrollData> viewEmployeePayroll() throws DBServiceException {
 
-		employeePayrollList = new ArrayList<>();
-		EmployeePayrollData employeePayrollData = null;
+		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+		
 		String query = "select * from employee_payroll";
 
 		new PayrollService();
@@ -37,14 +37,15 @@ public class EmployeePayrollServiceDB {
 		}
 		return employeePayrollList;
 	}
- 
+
 	public List<EmployeePayrollData> showEmployeePayrollByName(String name) throws DBServiceException {
 		List<EmployeePayrollData> employeePayrollListByName = new ArrayList<>();
-		String query = String.format("select * from employee_payroll where name = '%s';", name);
+		String query = String.format("select * from employee_payroll where name = ?;", name);
 		new PayrollService();
 		try (Connection connection = PayrollService.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
-			ResultSet resultSet = preparedStatement.executeQuery(query);
+			preparedStatement.setString(1, name );
+			ResultSet resultSet = preparedStatement.executeQuery();
 			if (resultSet.next()) {
 				int id = resultSet.getInt(1);
 				String gender = resultSet.getString(3);
@@ -72,31 +73,31 @@ public class EmployeePayrollServiceDB {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
 	}
-	
+
 	public void updateEmployeeSalaryUsingPreparedStatement(String name, double salary) throws DBServiceException {
 
 		String query = "update employee_payroll set salary = ? where name = ?";
 		new PayrollService();
-		try(Connection connection = PayrollService.getConnection()) {
+		try (Connection connection = PayrollService.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setDouble(1,salary);
-			preparedStatement.setString(2,name);
+			preparedStatement.setDouble(1, salary);
+			preparedStatement.setString(2, name);
 			int result = preparedStatement.executeUpdate();
 			employeePayrollData = getEmployeePayrollData(name);
-			if(result > 0 && employeePayrollData != null)
+			if (result > 0 && employeePayrollData != null)
 				employeePayrollData.setSalary(salary);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
-		
+
 	}
 
-	private EmployeePayrollData getEmployeePayrollData(String name) {
-		return employeePayrollList.stream()
-				                  .filter(e -> e.getName()
-				                  .equals(name))
-				                  .findFirst()
-				                  .orElse(null);
+	private EmployeePayrollData getEmployeePayrollData(String name) throws DBServiceException {
+		return viewEmployeePayroll().stream()
+				                    .filter(e -> e.getName()
+				                    .equals(name))
+				                    .findFirst()
+				                    .orElse(null);
 	}
 
 	public boolean checkForDBSync(String name) throws DBServiceException {
@@ -110,5 +111,29 @@ public class EmployeePayrollServiceDB {
 		return result;
 	}
 
-	
+	public List<EmployeePayrollData> showEmployeeJoinedWithinADateRange(LocalDate startDate, LocalDate endDate)
+			throws DBServiceException {
+		List<EmployeePayrollData> employeePayrollListJoinedWithinADateRange = new ArrayList<>();
+		String query = "select * from Employee_Payroll where start_date between ? and  ?";
+		new PayrollService();
+		try (Connection con = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = con.prepareStatement(query);
+			preparedStatement.setDate(1, Date.valueOf(startDate));
+			preparedStatement.setDate(2, Date.valueOf(endDate));
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				int id = resultSet.getInt(1);
+				String name = resultSet.getString(2);
+				String gender = resultSet.getString(3);
+				double salary = resultSet.getDouble(4);
+				LocalDate start = resultSet.getDate(5).toLocalDate();
+				employeePayrollData = new EmployeePayrollData(id, name, gender, salary, start);
+				employeePayrollListJoinedWithinADateRange.add(employeePayrollData);
+			}
+		} catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+		return employeePayrollListJoinedWithinADateRange;
+	}
+
 }
