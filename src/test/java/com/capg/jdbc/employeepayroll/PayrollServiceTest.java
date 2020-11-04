@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PayrollServiceTest 
@@ -22,12 +23,14 @@ public class PayrollServiceTest
 		employeePayrollList = new ArrayList<>();
 	}
 
+	@Ignore
 	@Test
 	public void givenEmployeePayrollDB_WhenRetrieved_ShouldMatchEmpCount() throws DBServiceException{
 		List<EmployeePayrollData> empPayrollList = employeePayrollServiceDB.viewEmployeePayroll();
 		Assert.assertEquals(4, empPayrollList.size());
 	}
 	
+	@Ignore
 	@Test
 	public void givenUpdatedSalary_WhenRetrieved_ShouldBeSyncedWithDB() throws DBServiceException{
 		employeePayrollServiceDB.updateEmployeeSalary("Terisa", 3000000.00);
@@ -35,6 +38,7 @@ public class PayrollServiceTest
 		Assert.assertTrue(checkIfSynced);
 	}
 	
+	@Ignore
 	@Test
 	public void givenUpdatedSalary_WhenRetrieved_ShouldBeSyncedWithDBUsingPreparedStatement() throws DBServiceException{
 		employeePayrollServiceDB.updateEmployeeSalaryUsingPreparedStatement("Terisa", 3000000.00);
@@ -42,12 +46,14 @@ public class PayrollServiceTest
 		Assert.assertTrue(checkIfSynced);
 	}
 	
+	@Ignore
 	@Test
 	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() throws DBServiceException{
 		List<EmployeePayrollData> employeePayrollList = employeePayrollServiceDB.showEmployeeJoinedWithinADateRange(LocalDate.of(2018,01,01), LocalDate.now() );
 		Assert.assertEquals(4, employeePayrollList.size());
 	}
 	
+	@Ignore
 	@Test
 	public void givenEmployeeDB_WhenRetrievedSum_ShouldReturnSumGroupedByGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "sum");
@@ -55,13 +61,15 @@ public class PayrollServiceTest
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
 
+	@Ignore
 	@Test
 	public void givenEmployeeDB_WhenRetrievedAvg_ShouldReturnAvgByGroupedGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "avg");
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("M"), 0);
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
-
+    
+	@Ignore
 	@Test
 	public void givenEmployeeDB_WhenRetrievedMax_ShouldReturnMaxGroupedByGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "max");
@@ -69,13 +77,15 @@ public class PayrollServiceTest
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
 	
+	@Ignore
 	@Test
 	public void givenEmployeeDB_WhenRetrievedMin_ShouldReturnMinGroupedByGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "min");
 		Assert.assertEquals(1000000, employeeDataGroupByGender.get("M"), 0);
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
-
+    
+	@Ignore
 	@Test
 	public void givenEmployeeDB_WhenRetrievedCount_ShouldReturnCountGroupedByGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary", "count");
