@@ -25,7 +25,7 @@ public class PayrollServiceTest
 	@Test
 	public void givenEmployeePayrollDB_WhenRetrieved_ShouldMatchEmpCount() throws DBServiceException{
 		List<EmployeePayrollData> empPayrollList = employeePayrollServiceDB.viewEmployeePayroll();
-		Assert.assertEquals(3, empPayrollList.size());
+		Assert.assertEquals(4, empPayrollList.size());
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class PayrollServiceTest
 	@Test
 	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() throws DBServiceException{
 		List<EmployeePayrollData> employeePayrollList = employeePayrollServiceDB.showEmployeeJoinedWithinADateRange(LocalDate.of(2018,01,01), LocalDate.now() );
-		Assert.assertEquals(3, employeePayrollList.size());
+		Assert.assertEquals(4, employeePayrollList.size());
 	}
 	
 	@Test
@@ -58,14 +58,14 @@ public class PayrollServiceTest
 	@Test
 	public void givenEmployeeDB_WhenRetrievedAvg_ShouldReturnAvgByGroupedGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "avg");
-		Assert.assertEquals(2000000, employeeDataGroupByGender.get("M"), 0);
+		Assert.assertEquals(3000000, employeeDataGroupByGender.get("M"), 0);
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
 
 	@Test
 	public void givenEmployeeDB_WhenRetrievedMax_ShouldReturnMaxGroupedByGender() throws DBServiceException {
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary" , "max");
-		Assert.assertEquals(3000000, employeeDataGroupByGender.get("M"), 0);
+		Assert.assertEquals(5000000, employeeDataGroupByGender.get("M"), 0);
 		Assert.assertEquals(3000000, employeeDataGroupByGender.get("F"), 0);
 	}
 	
@@ -81,5 +81,12 @@ public class PayrollServiceTest
 		employeeDataGroupByGender = employeePayrollServiceDB.showEmployeeDataGroupedByGender("salary", "count");
 		Assert.assertEquals(2, employeeDataGroupByGender.get("M"), 0);
 		Assert.assertEquals(1, employeeDataGroupByGender.get("F"), 0);
+	}
+	
+	@Test
+	public void addedNewEmployee_WhenRetrieved_ShouldBeSyncedWithDB() throws DBServiceException{
+		employeePayrollServiceDB.addNewEmployeeToDB("Mark" , "M", 5000000.0 , LocalDate.now());
+		boolean checkIfSynced = employeePayrollServiceDB.checkForDBSync("Mark");
+		Assert.assertTrue(checkIfSynced);
 	}
 }

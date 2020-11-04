@@ -10,8 +10,12 @@ public class EmployeePayrollData {
 	private LocalDate start_date;
 	
 	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start_date) {
-		super();
+		this(name,gender,salary,start_date);
 		this.id = id;
+	}
+	
+	public EmployeePayrollData(String name, String gender, double salary, LocalDate start_date) {
+		super();
 		this.name = name;
 		this.gender = gender;
 		this.salary = salary;

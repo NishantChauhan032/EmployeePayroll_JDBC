@@ -95,7 +95,11 @@ public class EmployeePayrollServiceDB {
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) throws DBServiceException {
-		return viewEmployeePayroll().stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+		return viewEmployeePayroll().stream()
+				                    .filter(e -> e.getName()
+				                    .equals(name))
+				                    .findFirst()
+				                    .orElse(null);
 	}
 
 	public boolean checkForDBSync(String name) throws DBServiceException {
@@ -112,7 +116,7 @@ public class EmployeePayrollServiceDB {
 	public List<EmployeePayrollData> showEmployeeJoinedWithinADateRange(LocalDate startDate, LocalDate endDate)
 			throws DBServiceException {
 		List<EmployeePayrollData> employeePayrollListJoinedWithinADateRange = new ArrayList<>();
-		String query = "select * from employee_payroll where start_date between ? and  ?";
+		String query = "select * from employee_payroll where start between ? and  ?";
 		new PayrollService();
 		try (Connection connection = PayrollService.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -149,5 +153,21 @@ public class EmployeePayrollServiceDB {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
 		return employeeDataGroupByGender;
+	}
+
+	public void addNewEmployeeToDB(String name, String gender, double salary, LocalDate start_date) throws DBServiceException {
+		String query = "insert into employee_payroll (name , gender, salary , start) values (?,?,?,?)";
+		try(Connection connection = new PayrollService().getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, name);
+			preparedStatement.setString(2, gender);
+			preparedStatement.setDouble(3, salary);
+			preparedStatement.setDate(4, Date.valueOf(start_date));
+			preparedStatement.executeUpdate();
+			employeePayrollData = new EmployeePayrollData(name, gender ,salary,start_date);
+			viewEmployeePayroll().add(employeePayrollData);	
+		}catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
 	}	
 }
