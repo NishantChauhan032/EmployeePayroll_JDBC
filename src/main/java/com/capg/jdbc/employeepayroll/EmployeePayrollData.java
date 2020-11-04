@@ -4,81 +4,83 @@ import java.time.LocalDate;
 
 public class EmployeePayrollData {
 	private int id;
+	private int company_id;
 	private String name;
 	private String gender;
+	private String dept_name;
 	private double salary;
-	private LocalDate start_date;
+	private double basic_pay;
+	private double deductions;
+	private double taxablePay;
+	private double tax;
+	private double netPay;
+	private LocalDate start;
 	
-	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start_date) {
-		this(name,gender,salary,start_date);
+	public EmployeePayrollData(int id, String name, String gender , double salary, LocalDate start) {
+		this.name = name;
+		this.gender = gender;
+		this.salary = salary;
+		this.start = start;
 		this.id = id;
 	}
 	
-	public EmployeePayrollData(String name, String gender, double salary, LocalDate start_date) {
+	public EmployeePayrollData(String name, String gender, double salary, LocalDate start_date , int company_id) {
 		super();
 		this.name = name;
 		this.gender = gender;
 		this.salary = salary;
-		this.start_date = start_date;
+		this.start = start_date;
+		this.company_id = company_id;
 	}
 
-	public int getID() {
+	public int getId() {
 		return id;
 	}
-
-	public void setID(int iD) {
-		id = iD;
+	
+	public void setId(int id) {
+		this.id = id;
 	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getGender() {
+		return gender;
+	}
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
 
 	public double getSalary() {
 		return salary;
 	}
-
 	public void setSalary(double salary) {
 		this.salary = salary;
 	}
-
 	public LocalDate getStart_date() {
-		return start_date;
+		return start;
 	}
-
 	public void setStart_date(LocalDate start_date) {
-		this.start_date = start_date;
-	}
-	
-
-	public String getGender() {
-		return gender;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
+		this.start = start_date;
 	}
 
 	@Override
 	public String toString() {
-		return "EmployeePayrollData [ID=" + id + ", name=" + name + ", salary=" + salary + ", start_date=" + start_date
-				+ "]";
+		return "EmployeePayrollData [emp_id=" + id + ", name=" + name + ", gender=" + gender + ", salary=" + salary
+				+ ", start_date=" + start + "]";
 	}
-	
+
 	@Override
-	public boolean equals(Object object) {
-		if (this == object)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (object == null)
+		if (obj == null)
 			return false;
-		if (getClass() != object.getClass())
+		if (getClass() != obj.getClass())
 			return false;
-		
-		EmployeePayrollData other = (EmployeePayrollData) object;
+		EmployeePayrollData other = (EmployeePayrollData) obj;
 		if (id != other.id)
 			return false;
 		if (gender == null) {
@@ -93,13 +95,12 @@ public class EmployeePayrollData {
 			return false;
 		if (Double.doubleToLongBits(salary) != Double.doubleToLongBits(other.salary))
 			return false;
-		if (start_date == null) {
-			if (other.start_date != null)
+		if (start == null) {
+			if (other.start != null)
 				return false;
-		} else if (!start_date.equals(other.start_date))
+		} else if (!start.equals(other.start))
 			return false;
 		return true;
 	}
-
-
+	
 }

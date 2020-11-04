@@ -96,11 +96,7 @@ public class EmployeePayrollServiceDB {
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) throws DBServiceException {
-		return viewEmployeePayroll().stream()
-				                    .filter(e -> e.getName()
-				                    .equals(name))
-				                    .findFirst()
-				                    .orElse(null);
+		return viewEmployeePayroll().stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	public boolean checkForDBSync(String name) throws DBServiceException {
@@ -139,87 +135,107 @@ public class EmployeePayrollServiceDB {
 		return employeePayrollListJoinedWithinADateRange;
 	}
 
-	public Map<String,Double> showEmployeeDataGroupedByGender(String column , String operation) throws DBServiceException
-	{
-		Map<String,Double> employeeDataGroupByGender = new HashMap<>();
-		String query = String.format("select gender , %s(%s) from employee_payroll group by gender;" , operation , column);
-		try(Connection connection = new PayrollService().getConnection()) {
+	public Map<String, Double> showEmployeeDataGroupedByGender(String column, String operation)
+			throws DBServiceException {
+		Map<String, Double> employeeDataGroupByGender = new HashMap<>();
+		String query = String.format("select gender , %s(%s) from employee_payroll group by gender;", operation,
+				column);
+		try (Connection connection = new PayrollService().getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			ResultSet resultSet = preparedStatement.executeQuery();
-			while(resultSet.next())
-			{
+			while (resultSet.next()) {
 				employeeDataGroupByGender.put(resultSet.getString(1), resultSet.getDouble(2));
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
 		return employeeDataGroupByGender;
 	}
-	
 
-	public List<EmployeePayrollData> addNewEmployeeToDB(String name , String gender , double salary , LocalDate start_date) throws DBServiceException
-	{
+	public List<EmployeePayrollData> addNewEmployeeToDB(String name, String gender, double salary,
+			LocalDate start_date, int company_id, String department) throws DBServiceException {
 		Connection connection = null;
-		int employeeID= -1;
+		int id = -1;
 		try {
-			connection =PayrollService.getConnection();
+			connection = PayrollService.getConnection();
 			connection.setAutoCommit(false);
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		String query = String.format("insert into employee_payroll(name , gender, salary , start)" + 
-									"values ('%s','%s','%s','%s');",name,gender,salary,Date.valueOf(start_date));
-		try(Statement statement = connection.createStatement()) {
-			
-			int rowAffected = statement.executeUpdate(query , statement.RETURN_GENERATED_KEYS);
-			if(rowAffected == 1)
-			{
-			ResultSet resultSet = statement.getGeneratedKeys();
-			if(resultSet.next())
-				employeeID  = resultSet.getInt(1);
-			employeePayrollData = new EmployeePayrollData( name, gender ,salary,start_date);
-			viewEmployeePayroll().add(employeePayrollData);
+		String query = String.format(
+				"insert into employee_payroll(name , gender, salary , start,company_id)"
+						+ "values ('%s','%s','%s','%s','%s');",
+				name, gender, salary, Date.valueOf(start_date), company_id);
+		try (Statement statement = connection.createStatement()) {
+
+			int rowAffected = statement.executeUpdate(query, statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if (resultSet.next())
+					id = resultSet.getInt(1);
+				employeePayrollData = new EmployeePayrollData(name, gender, salary, start_date, company_id);
+				viewEmployeePayroll().add(employeePayrollData);
 			}
-		}catch (SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
+			try {
+				connection.rollback();
+				return viewEmployeePayroll();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+		try (Statement statement = connection.createStatement()) {
+			String query3 = String.format("insert into department(id,dept_name)values('%s','%s');", id,
+					department);
+			int rowAffected = statement.executeUpdate(query3, Statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if (resultSet.next())
+					id = resultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+		try (Statement statement = connection.createStatement()) {
+			double deductions = salary * 0.2;
+			double taxablePay = salary - deductions;
+			double tax = taxablePay * 0.1;
+			double netPay = taxablePay = tax;
+			String query1 = String.format(
+					"insert into payroll_details(id,basic_pay,deductions,taxablePay,tax,netPay)"
+							+ " values ('%s','%s','%s','%s','%s','%s');",
+					id, salary, deductions, taxablePay, tax, netPay);
+			int rowAffected = statement.executeUpdate(query1);
+			if (rowAffected == 1) {
+				employeePayrollData = new EmployeePayrollData(id, name, gender, salary, start_date);
+			}
+		} catch (SQLException e3) {
+			e3.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
 		try {
-			connection.rollback();
-			return viewEmployeePayroll();
-		}catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-	}
-	try (Statement statement = connection.createStatement()) {
-		double deductions = salary * 0.2;
-		double taxablePay = salary - deductions;
-		double tax = taxablePay * 0.1;
-		double netPay = taxablePay = tax;
-		String newQuery = String.format("insert into payroll_details(id,basic_pay,deductions,taxablepay,tax,netPay)"+
-									" values ('%s','%s','%s','%s','%s','%s');", employeeID, salary, deductions, taxablePay, tax, netPay);
-		int rowAffected = statement.executeUpdate(newQuery);
-		if (rowAffected == 1) {
-			employeePayrollData = new EmployeePayrollData(employeeID, name, gender , salary, start_date);
-		}
-	} catch (SQLException e) {
-		e.printStackTrace();
-		try {
-			connection.rollback();
-		}catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-	}
-	try {
-		connection.commit();
-	}catch(SQLException e) {
-		e.printStackTrace();
-		}finally {
-			if(connection!=null)
+			connection.commit();
+		} catch (SQLException e4) {
+			e4.printStackTrace();
+		} finally {
+			if (connection != null)
 				try {
 					connection.close();
-				}catch(SQLException e) {
-					e.printStackTrace();}
+				} catch (SQLException e5) {
+					e5.printStackTrace();
+				}
 		}
-	return viewEmployeePayroll();
+		return viewEmployeePayroll();
 	}
+
 }

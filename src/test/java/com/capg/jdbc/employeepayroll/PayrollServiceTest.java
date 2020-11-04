@@ -95,7 +95,7 @@ public class PayrollServiceTest
 	
 	@Test
 	public void addedNewEmployee_WhenRetrieved_ShouldBeSyncedWithDB() throws DBServiceException{
-		employeePayrollServiceDB.addNewEmployeeToDB("Mark" , "M", 5000000.0 , LocalDate.now());
+		employeePayrollServiceDB.addNewEmployeeToDB("Mark" , "M", 5000000.0 , LocalDate.now(),1,"Sales");
 		boolean checkIfSynced = employeePayrollServiceDB.checkForDBSync("Mark");
 		Assert.assertTrue(checkIfSynced);
 	}
