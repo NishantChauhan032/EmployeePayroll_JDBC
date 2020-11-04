@@ -101,10 +101,18 @@ public class PayrollServiceTest
 		Assert.assertTrue(checkIfSynced);
 	}
 	
+	@Ignore
 	@Test
 	public void addedNewEmployee_WhenRetrieved_ShouldReturnPayrollDetailsAndBeSyncedWithDB() throws DBServiceException{
 		employeePayrollServiceDB.showEmployeeAndPayrollDetailsByName("Mark");
-		boolean isSynced = employeePayrollServiceDB.checkForDBSync("Mark");
-		Assert.assertTrue(isSynced);
+		boolean checkIfSynced = employeePayrollServiceDB.checkForDBSync("Mark");
+		Assert.assertTrue(checkIfSynced);
+	}
+	
+	@Test
+	public void givenEmployeeId_WhenDeleted_ShouldSyncWithDB() throws DBServiceException {
+		employeePayrollServiceDB.removeExistingEmployeeFromDB(3);
+		Assert.assertEquals(3,employeePayrollList.size());
+		
 	}
 }

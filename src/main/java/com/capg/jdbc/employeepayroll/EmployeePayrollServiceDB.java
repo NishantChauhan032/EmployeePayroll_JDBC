@@ -152,8 +152,8 @@ public class EmployeePayrollServiceDB {
 		return employeeDataGroupByGender;
 	}
 
-	public List<EmployeePayrollData> addNewEmployeeToDB(String name, String gender, double salary,
-			LocalDate start_date, int company_id, String department) throws DBServiceException {
+	public List<EmployeePayrollData> addNewEmployeeToDB(String name, String gender, double salary, LocalDate start_date,
+			int company_id, String department) throws DBServiceException {
 		Connection connection = null;
 		int id = -1;
 		try {
@@ -186,8 +186,7 @@ public class EmployeePayrollServiceDB {
 			}
 		}
 		try (Statement statement = connection.createStatement()) {
-			String query3 = String.format("insert into department(id,dept_name)values('%s','%s');", id,
-					department);
+			String query3 = String.format("insert into department(id,dept_name)values('%s','%s');", id, department);
 			int rowAffected = statement.executeUpdate(query3, Statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1) {
 				ResultSet resultSet = statement.getGeneratedKeys();
@@ -239,33 +238,41 @@ public class EmployeePayrollServiceDB {
 	}
 
 	public List<EmployeePayrollData> showEmployeeAndPayrollDetailsByName(String name) throws DBServiceException {
-			List<EmployeePayrollData> empPayrollDetailsListByName = new ArrayList<>();
-			String query = "select * from employee_payroll , payroll_details where name = ?";
-			try(Connection connection = PayrollService.getConnection()) {
-				PreparedStatement preparedStatement = connection.prepareStatement(query);
-				preparedStatement.setString(1, name );
-				ResultSet resultSet = preparedStatement.executeQuery();
-				if(resultSet.next())
-				{
-					int id = resultSet.getInt(1);
-					String gender = resultSet.getString(3);
-					double salary = resultSet.getDouble(4);
-					LocalDate start = resultSet.getDate(5).toLocalDate();
-					int emp_id = resultSet.getInt(6);
-					double basic_pay = resultSet.getDouble(7);
-					double deductions = resultSet.getDouble(8);
-					double taxablePay = resultSet.getDouble(9);
-					double tax = resultSet.getDouble(10);
-					double netPay = resultSet.getDouble(11);
-					employeePayrollData = new EmployeePayrollData(id, name, gender ,salary,start,basic_pay,deductions,taxablePay,tax,netPay);
-					empPayrollDetailsListByName.add(employeePayrollData);
-				}
-			} catch (Exception e) {
-				throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		List<EmployeePayrollData> empPayrollDetailsListByName = new ArrayList<>();
+		String query = "select * from employee_payroll , payroll_details where name = ?";
+		try (Connection connection = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, name);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if (resultSet.next()) {
+				int id = resultSet.getInt(1);
+				String gender = resultSet.getString(3);
+				double salary = resultSet.getDouble(4);
+				LocalDate start = resultSet.getDate(5).toLocalDate();
+				int emp_id = resultSet.getInt(6);
+				double basic_pay = resultSet.getDouble(7);
+				double deductions = resultSet.getDouble(8);
+				double taxablePay = resultSet.getDouble(9);
+				double tax = resultSet.getDouble(10);
+				double netPay = resultSet.getDouble(11);
+				employeePayrollData = new EmployeePayrollData(id, name, gender, salary, start, basic_pay, deductions,
+						taxablePay, tax, netPay);
+				empPayrollDetailsListByName.add(employeePayrollData);
 			}
-			return empPayrollDetailsListByName;
+		} catch (Exception e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
-		
+		return empPayrollDetailsListByName;
 	}
 
+	public void removeExistingEmployeeFromDB(int id) throws DBServiceException {
+		String query = String.format("update umployee_payroll set is_active = false WHERE id= '%s';", id);
+		try (Connection connection = PayrollService.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+		}
+	}
 
+}
