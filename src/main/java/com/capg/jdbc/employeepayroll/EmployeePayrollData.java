@@ -32,6 +32,16 @@ public class EmployeePayrollData {
 		this.start = start_date;
 		this.company_id = company_id;
 	}
+	
+	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start, double basic_pay, double deductions, double taxable_pay, double tax, double net_pay) {
+		this(id,name,gender,salary,start);
+		this.basic_pay = basic_pay;
+		this.deductions = deductions;
+		this.taxablePay = taxable_pay;
+		this.tax = tax;
+		this.netPay = net_pay;
+	
+	}
 
 	public int getId() {
 		return id;

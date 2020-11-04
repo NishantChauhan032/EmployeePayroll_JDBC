@@ -238,4 +238,34 @@ public class EmployeePayrollServiceDB {
 		return viewEmployeePayroll();
 	}
 
-}
+	public List<EmployeePayrollData> showEmployeeAndPayrollDetailsByName(String name) throws DBServiceException {
+			List<EmployeePayrollData> empPayrollDetailsListByName = new ArrayList<>();
+			String query = "select * from employee_payroll , payroll_details where name = ?";
+			try(Connection connection = PayrollService.getConnection()) {
+				PreparedStatement preparedStatement = connection.prepareStatement(query);
+				preparedStatement.setString(1, name );
+				ResultSet resultSet = preparedStatement.executeQuery();
+				if(resultSet.next())
+				{
+					int id = resultSet.getInt(1);
+					String gender = resultSet.getString(3);
+					double salary = resultSet.getDouble(4);
+					LocalDate start = resultSet.getDate(5).toLocalDate();
+					int emp_id = resultSet.getInt(6);
+					double basic_pay = resultSet.getDouble(7);
+					double deductions = resultSet.getDouble(8);
+					double taxablePay = resultSet.getDouble(9);
+					double tax = resultSet.getDouble(10);
+					double netPay = resultSet.getDouble(11);
+					employeePayrollData = new EmployeePayrollData(id, name, gender ,salary,start,basic_pay,deductions,taxablePay,tax,netPay);
+					empPayrollDetailsListByName.add(employeePayrollData);
+				}
+			} catch (Exception e) {
+				throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
+			}
+			return empPayrollDetailsListByName;
+		}
+		
+	}
+
+
