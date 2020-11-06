@@ -105,6 +105,7 @@ public class EmployeePayrollData {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+
 		EmployeePayrollData other = (EmployeePayrollData) obj;
 		if (id != other.id)
 			return false;
@@ -118,6 +119,7 @@ public class EmployeePayrollData {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+
 		if (Double.doubleToLongBits(salary) != Double.doubleToLongBits(other.salary))
 			return false;
 		if (start == null) {

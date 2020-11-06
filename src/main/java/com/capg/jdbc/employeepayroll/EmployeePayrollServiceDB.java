@@ -218,14 +218,14 @@ public class EmployeePayrollServiceDB {
 			e3.printStackTrace();
 			try {
 				connection.rollback();
-			} catch (SQLException e1) {
+			} catch (SQLException e1) {     
 				e1.printStackTrace();
 			}
 		}
 		try {
 			connection.commit();
 		} catch (SQLException e4) {
-			e4.printStackTrace();
+			e4.printStackTrace();                    
 		} finally {
 			if (connection != null)
 				try {
@@ -323,14 +323,16 @@ public class EmployeePayrollServiceDB {
 		for (EmployeePayrollData employee : EmpList) {
 			Runnable task = () -> {
 				empAdditionStatus.put(employee.hashCode(), false);
+				System.out.println("Employee Being Added : "+Thread.currentThread().getName());
 				try {
 					this.addNewEmployeeToDB(employee.getName(), employee.getGender(), employee.getSalary(),
 							employee.getStart_date());
 				} catch (DBServiceException e) {
 				}
 				empAdditionStatus.put(employee.hashCode(), true);
+				System.out.println("Employee Added : "+Thread.currentThread().getName());
 			};
-			Thread thread = new Thread(task);
+			Thread thread = new Thread(task,employeePayrollData.getName());
 			thread.start();
 			while (empAdditionStatus.containsValue(false)) {
 				try {
@@ -342,4 +344,5 @@ public class EmployeePayrollServiceDB {
 		}
 
 	}
+
 }
