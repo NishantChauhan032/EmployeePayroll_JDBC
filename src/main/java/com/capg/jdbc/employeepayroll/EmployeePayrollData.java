@@ -15,7 +15,7 @@ public class EmployeePayrollData {
 	private double tax;
 	private double netPay;
 	private LocalDate start;
-	
+
 	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start) {
 		this.name = name;
 		this.gender = gender;
@@ -51,7 +51,8 @@ public class EmployeePayrollData {
 		this.start = start;
 	}
 
-	public EmployeePayrollData(String name, String gender, double salary, LocalDate start, int company_id, String department) {
+	public EmployeePayrollData(String name, String gender, double salary, LocalDate start, int company_id,
+			String department) {
 		this.name = name;
 		this.gender = gender;
 		this.salary = salary;
@@ -59,8 +60,11 @@ public class EmployeePayrollData {
 		this.company_id = company_id;
 		this.department = department;
 	}
-	
-	
+
+	public EmployeePayrollData(String name, double salary) {
+		this.name = name;
+		this.salary = salary;
+	}
 
 	public String getDepartment() {
 		return department;
