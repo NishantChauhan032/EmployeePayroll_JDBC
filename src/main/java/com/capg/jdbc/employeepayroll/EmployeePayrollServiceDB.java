@@ -277,13 +277,13 @@ public class EmployeePayrollServiceDB {
 
 	public void addEmployeeToPayroll(List<EmployeePayrollData> EmpList) throws DBServiceException {
 		for (EmployeePayrollData employee : EmpList) {
-			insertNewEmployeeToDBWithoutThread(employee.getName(), employee.getGender(), employee.getSalary(),
+			addNewEmployeeToDB(employee.getName(), employee.getGender(), employee.getSalary(),
 					employee.getStart_date());
 		}
 	}
 
-	public List<EmployeePayrollData> insertNewEmployeeToDBWithoutThread(String name, String gender, double salary,
-			LocalDate start) throws DBServiceException {
+	public List<EmployeePayrollData> addNewEmployeeToDB(String name, String gender, double salary, LocalDate start)
+			throws DBServiceException {
 		List<EmployeePayrollData> empList = new ArrayList<EmployeePayrollData>();
 		Connection connection = null;
 		int employeeID = -1;
@@ -318,4 +318,28 @@ public class EmployeePayrollServiceDB {
 		return empList;
 	}
 
+	public void addEmployeeToPayrollUsingThreads(List<EmployeePayrollData> EmpList) throws DBServiceException {
+		Map<Integer, Boolean> empAdditionStatus = new HashMap<>();
+		for (EmployeePayrollData employee : EmpList) {
+			Runnable task = () -> {
+				empAdditionStatus.put(employee.hashCode(), false);
+				try {
+					this.addNewEmployeeToDB(employee.getName(), employee.getGender(), employee.getSalary(),
+							employee.getStart_date());
+				} catch (DBServiceException e) {
+				}
+				empAdditionStatus.put(employee.hashCode(), true);
+			};
+			Thread thread = new Thread(task);
+			thread.start();
+			while (empAdditionStatus.containsValue(false)) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
 }
