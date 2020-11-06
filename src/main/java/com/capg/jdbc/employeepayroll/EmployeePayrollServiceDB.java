@@ -332,7 +332,7 @@ public class EmployeePayrollServiceDB {
 				empAdditionStatus.put(employee.hashCode(), true);
 				System.out.println("Employee Added : "+Thread.currentThread().getName());
 			};
-			Thread thread = new Thread(task,employeePayrollData.getName());
+			Thread thread = new Thread(task,employee.getName());
 			thread.start();
 			while (empAdditionStatus.containsValue(false)) {
 				try {
@@ -343,6 +343,33 @@ public class EmployeePayrollServiceDB {
 			}
 		}
 
+	}
+	
+	public void insertEmployeeToPayrollDetailsUsingThreads(List<EmployeePayrollData> EmpList) throws DBServiceException{
+		
+		Map<Integer,Boolean> employeeAdditionStatus = new HashMap<>();
+		for (EmployeePayrollData employee : EmpList) {
+				
+		Runnable task = ()->{
+			employeeAdditionStatus.put(employee.hashCode(),false);
+			try {
+				this.addNewEmployeeToDB(employee.getName(),employee.getGender(),employee.getSalary(),
+										   employee.getStart_date(),employee.getCompany_id(),employee.getDepartment());
+			} catch (DBServiceException e) {
+			}
+			employeeAdditionStatus.put(employee.hashCode(),true);
+		};
+		
+		Thread thread=new Thread(task,employee.getName());
+		thread.start();
+		while(employeeAdditionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }
