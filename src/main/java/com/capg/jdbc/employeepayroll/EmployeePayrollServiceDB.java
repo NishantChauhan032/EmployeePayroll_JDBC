@@ -332,7 +332,7 @@ public class EmployeePayrollServiceDB {
 				empAdditionStatus.put(employee.hashCode(), true);
 				System.out.println("Employee Added : "+Thread.currentThread().getName());
 			};
-			Thread thread = new Thread(task,employeePayrollData.getName());
+			Thread thread = new Thread(task,employee.getName());
 			thread.start();
 			while (empAdditionStatus.containsValue(false)) {
 				try {
