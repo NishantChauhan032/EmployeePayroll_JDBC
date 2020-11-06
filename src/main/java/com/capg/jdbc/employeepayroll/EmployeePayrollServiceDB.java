@@ -266,13 +266,56 @@ public class EmployeePayrollServiceDB {
 	}
 
 	public void removeExistingEmployeeFromDB(int id) throws DBServiceException {
-		String query = String.format("update umployee_payroll set is_active = false WHERE id= '%s';", id);
+		String query = String.format("update employee_payroll set is_active = false WHERE id= '%s';", id);
 		try (Connection connection = PayrollService.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			throw new DBServiceException("SQL Exception", DBServiceExceptionType.SQL_EXCEPTION);
 		}
+	}
+
+	public void addEmployeeToPayroll(List<EmployeePayrollData> EmpList) throws DBServiceException {
+		for (EmployeePayrollData employee : EmpList) {
+			insertNewEmployeeToDBWithoutThread(employee.getName(), employee.getGender(), employee.getSalary(),
+					employee.getStart_date());
+		}
+	}
+
+	public List<EmployeePayrollData> insertNewEmployeeToDBWithoutThread(String name, String gender, double salary,
+			LocalDate start) throws DBServiceException {
+		List<EmployeePayrollData> empList = new ArrayList<EmployeePayrollData>();
+		Connection connection = null;
+		int employeeID = -1;
+		try {
+			connection = PayrollService.getConnection();
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		String query = String.format(
+				"insert into employee_payroll(name , gender, salary , start)" + "values ('%s','%s','%s','%s');", name,
+				gender, salary, Date.valueOf(start));
+		try (Statement statement = connection.createStatement()) {
+
+			int rowAffected = statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+				if (resultSet.next())
+					employeeID = resultSet.getInt(1);
+				employeePayrollData = new EmployeePayrollData(name, gender, salary, start);
+				empList.add(employeePayrollData);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+				return viewEmployeePayroll();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return empList;
 	}
 
 }

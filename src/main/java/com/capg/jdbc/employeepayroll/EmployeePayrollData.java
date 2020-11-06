@@ -15,16 +15,16 @@ public class EmployeePayrollData {
 	private double tax;
 	private double netPay;
 	private LocalDate start;
-	
-	public EmployeePayrollData(int id, String name, String gender , double salary, LocalDate start) {
+
+	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start) {
 		this.name = name;
 		this.gender = gender;
 		this.salary = salary;
 		this.start = start;
 		this.id = id;
 	}
-	
-	public EmployeePayrollData(String name, String gender, double salary, LocalDate start_date , int company_id) {
+
+	public EmployeePayrollData(String name, String gender, double salary, LocalDate start_date, int company_id) {
 		super();
 		this.name = name;
 		this.gender = gender;
@@ -32,33 +32,45 @@ public class EmployeePayrollData {
 		this.start = start_date;
 		this.company_id = company_id;
 	}
-	
-	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start, double basic_pay, double deductions, double taxable_pay, double tax, double net_pay) {
-		this(id,name,gender,salary,start);
+
+	public EmployeePayrollData(int id, String name, String gender, double salary, LocalDate start, double basic_pay,
+			double deductions, double taxable_pay, double tax, double net_pay) {
+		this(id, name, gender, salary, start);
 		this.basic_pay = basic_pay;
 		this.deductions = deductions;
 		this.taxablePay = taxable_pay;
 		this.tax = tax;
 		this.netPay = net_pay;
-	
+
+	}
+
+	public EmployeePayrollData(String name, String gender, double salary, LocalDate start) {
+		this.name = name;
+		this.gender = gender;
+		this.salary = salary;
+		this.start = start;
 	}
 
 	public int getId() {
 		return id;
 	}
-	
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getGender() {
 		return gender;
 	}
+
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
@@ -66,12 +78,15 @@ public class EmployeePayrollData {
 	public double getSalary() {
 		return salary;
 	}
+
 	public void setSalary(double salary) {
 		this.salary = salary;
 	}
+
 	public LocalDate getStart_date() {
 		return start;
 	}
+
 	public void setStart_date(LocalDate start_date) {
 		this.start = start_date;
 	}
@@ -112,5 +127,5 @@ public class EmployeePayrollData {
 			return false;
 		return true;
 	}
-	
+
 }
